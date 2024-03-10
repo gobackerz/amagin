@@ -48,6 +48,66 @@ func (a *App) GET(relativePath string, handler func(ctx *Context) (interface{}, 
 	})
 }
 
+func (a *App) POST(relativePath string, handler func(ctx *Context) (interface{}, error)) {
+	a.e.GET(relativePath, func(c *gin.Context) {
+		ctx := NewContext(c, a)
+
+		res, err := handler(ctx)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
+	})
+}
+
+func (a *App) PUT(relativePath string, handler func(ctx *Context) (interface{}, error)) {
+	a.e.GET(relativePath, func(c *gin.Context) {
+		ctx := NewContext(c, a)
+
+		res, err := handler(ctx)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
+	})
+}
+
+func (a *App) PATCH(relativePath string, handler func(ctx *Context) (interface{}, error)) {
+	a.e.GET(relativePath, func(c *gin.Context) {
+		ctx := NewContext(c, a)
+
+		res, err := handler(ctx)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
+	})
+}
+
+func (a *App) DELETE(relativePath string, handler func(ctx *Context) (interface{}, error)) {
+	a.e.GET(relativePath, func(c *gin.Context) {
+		ctx := NewContext(c, a)
+
+		res, err := handler(ctx)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
+	})
+}
+
 func (a *App) Run() {
 	httpPort := a.Get("HTTP_PORT", "8000")
 
