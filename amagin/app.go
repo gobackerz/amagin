@@ -49,7 +49,7 @@ func (a *App) GET(relativePath string, handler func(ctx *Context) (interface{}, 
 }
 
 func (a *App) POST(relativePath string, handler func(ctx *Context) (interface{}, error)) {
-	a.e.GET(relativePath, func(c *gin.Context) {
+	a.e.POST(relativePath, func(c *gin.Context) {
 		ctx := NewContext(c, a)
 
 		res, err := handler(ctx)
@@ -64,7 +64,7 @@ func (a *App) POST(relativePath string, handler func(ctx *Context) (interface{},
 }
 
 func (a *App) PUT(relativePath string, handler func(ctx *Context) (interface{}, error)) {
-	a.e.GET(relativePath, func(c *gin.Context) {
+	a.e.PUT(relativePath, func(c *gin.Context) {
 		ctx := NewContext(c, a)
 
 		res, err := handler(ctx)
@@ -79,7 +79,7 @@ func (a *App) PUT(relativePath string, handler func(ctx *Context) (interface{}, 
 }
 
 func (a *App) PATCH(relativePath string, handler func(ctx *Context) (interface{}, error)) {
-	a.e.GET(relativePath, func(c *gin.Context) {
+	a.e.PATCH(relativePath, func(c *gin.Context) {
 		ctx := NewContext(c, a)
 
 		res, err := handler(ctx)
@@ -94,7 +94,7 @@ func (a *App) PATCH(relativePath string, handler func(ctx *Context) (interface{}
 }
 
 func (a *App) DELETE(relativePath string, handler func(ctx *Context) (interface{}, error)) {
-	a.e.GET(relativePath, func(c *gin.Context) {
+	a.e.DELETE(relativePath, func(c *gin.Context) {
 		ctx := NewContext(c, a)
 
 		res, err := handler(ctx)
