@@ -38,7 +38,7 @@ func New(logger pkgLogger.Logger) *App {
 
 func (a *App) GET(relativePath string, handler Handler) {
 	a.e.GET(relativePath, func(c *gin.Context) {
-		a.processHandler(c, handler, http.StatusOK, http.StatusNotFound)
+		a.processHandler(c, handler, http.StatusOK)
 	})
 }
 
@@ -128,10 +128,14 @@ func (a *App) getStatusCodeFromObj(obj any, defaultStatusCode int) int {
 func (a *App) getResponse(res any, err error) any {
 	if res != nil && err != nil {
 		return map[string]any{
-			"data":  res,
-			"error": err,
+			"data":   res,
+			"errors": err,
 		}
 	} else if err != nil {
+		if errResp, ok := err.(response.EncapsulatedError); ok {
+			return errResp.EncapsulateError()
+		}
+
 		return err
 	} else {
 		return res
