@@ -2,13 +2,13 @@ package config
 
 import (
 	"fmt"
+	"github.com/gobackerz/amagin/config/errors"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/joho/godotenv"
 
-	"github.com/gobackerz/amagin/errors"
 	pkgLog "github.com/gobackerz/amagin/log"
 )
 
