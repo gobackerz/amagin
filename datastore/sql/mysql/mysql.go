@@ -4,14 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/gobackerz/amagin/constants"
+	"time"
 
+	"github.com/gobackerz/amagin/constants"
+	pkgSQL "github.com/gobackerz/amagin/datastore/sql"
 	"github.com/gobackerz/amagin/log"
 )
 
 type mysql struct {
 	db     *sql.DB
-	tx     *sql.Tx
 	logger log.Logger
 }
 
@@ -34,45 +35,39 @@ func New(host, port, user, password, name string, logger log.Logger) (*mysql, er
 	return &mysql{db: db, logger: logger}, nil
 }
 
-func (m *mysql) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
-	m.logger.Printf("%s", query)
+func (m *mysql) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {
+	startTime := time.Now()
+
+	defer m.queryLogger(startTime, query)
+
+	return m.db.ExecContext(ctx, query, args...)
+}
+
+func (m *mysql) Query(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+	startTime := time.Now()
+
+	defer m.queryLogger(startTime, query)
+
+	return m.db.QueryContext(ctx, query, args...)
+}
+
+func (m *mysql) QueryRow(ctx context.Context, query string, args ...any) *sql.Row {
+	startTime := time.Now()
+
+	defer m.queryLogger(startTime, query)
 
 	return m.db.QueryRowContext(ctx, query, args...)
 }
 
-func (m *mysql) QueryRowContextTx(ctx context.Context, query string, args ...any) *sql.Row {
-	m.logger.Printf("%s", query)
-
-	if m.tx != nil {
-		m.tx.QueryRowContext(ctx, query, args...)
-	}
-
-	return m.db.QueryRowContext(ctx, query, args...)
-}
-
-func (m *mysql) Begin() error {
+func (m *mysql) Begin() (pkgSQL.Transaction, error) {
 	tx, err := m.db.Begin()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	m.tx = tx
-
-	return nil
+	return &transaction{tx: tx, logger: m.logger}, nil
 }
 
-func (m *mysql) Commit() error {
-	if m.tx != nil {
-		return m.tx.Commit()
-	}
-
-	return nil
-}
-
-func (m *mysql) Rollback() error {
-	if m.tx != nil {
-		return m.tx.Rollback()
-	}
-
-	return nil
+func (m *mysql) queryLogger(startTime time.Time, query string) {
+	m.logger.Printf("%s", query)
 }
