@@ -39,7 +39,7 @@ func (a *App) DELETE(relativePath string, handler Handler) {
 }
 
 func (a *App) processHandler(c *gin.Context, handler Handler, defaultStatusCodes ...int) {
-	ctx := NewContext(c, a)
+	ctx := NewContext(c, a.datastore, a.Logger())
 
 	res, err := handler(ctx)
 	if err != nil {

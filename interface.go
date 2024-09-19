@@ -1,6 +1,9 @@
 package amagin
 
-import "github.com/gobackerz/amagin/datastore/sql"
+import (
+	"context"
+	"database/sql"
+)
 
 type Logger interface {
 	Debug(msg string, args ...any)
@@ -9,12 +12,9 @@ type Logger interface {
 	Error(msg string, args ...any)
 }
 
-type Config interface {
-	Get(key string, defaultVal ...string) string
-	Set(key string, value string) error
-	Unset(key string) error
-}
-
-type Datastore interface {
-	Db() sql.SQL
+type SQL interface {
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+	Begin() (*sql.Tx, error)
 }

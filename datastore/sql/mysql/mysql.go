@@ -8,7 +8,6 @@ import (
 
 	"github.com/gobackerz/amagin"
 	"github.com/gobackerz/amagin/constants"
-	pkgSQL "github.com/gobackerz/amagin/datastore/sql"
 )
 
 type mysql struct {

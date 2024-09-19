@@ -2,13 +2,12 @@ package amagin
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"os"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/gobackerz/amagin"
-	"github.com/gobackerz/amagin/config"
 	"github.com/gobackerz/amagin/constants"
-	"github.com/gobackerz/amagin/datastore"
 	pkgLogger "github.com/gobackerz/amagin/log"
 )
 
@@ -20,11 +19,11 @@ const (
 )
 
 type App struct {
-	amagin.Config
-	amagin.Datastore
+	*datastore
 
 	e      *gin.Engine
 	logger amagin.Logger
+	Config *config
 }
 
 type Handler func(ctx *Context) (interface{}, error)
@@ -37,9 +36,9 @@ func New() *App {
 
 func Default() *App {
 	logger := pkgLogger.New(getLogLevelFromEnv())
-	cfg := config.New(logger)
+	cfg := newConfig(logger)
 	performanceLogWriter := &performanceLogger{logger: logger, isTerm: logger.IsTerm()}
-	ds, _ := datastore.New(cfg, logger)
+	ds := &datastore{}
 
 	gin.ForceConsoleColor()
 
@@ -48,7 +47,7 @@ func Default() *App {
 	e.Use(gin.Recovery())
 	e.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: performanceLogWriter.formatter, Output: performanceLogWriter}))
 
-	return &App{Config: cfg, Datastore: ds, e: e, logger: logger}
+	return &App{Config: cfg, datastore: ds, e: e, logger: logger}
 }
 
 func getLogLevelFromEnv() int {
@@ -75,16 +74,12 @@ func (a *App) UseLogger(logger amagin.Logger) {
 	a.logger = logger
 }
 
-func (a *App) UseConfig(cfg amagin.Config) {
-	a.Config = cfg
-}
-
-func (a *App) UseDatastore(ds amagin.Datastore) {
-	a.Datastore = ds
+func (a *App) UseSQL(sql amagin.SQL) {
+	a.datastore.sql = sql
 }
 
 func (a *App) Run() {
-	httpPort := a.Get("HTTP_PORT", "8000")
+	httpPort := a.Config.Get("HTTP_PORT", "8000")
 
 	a.e.Run(fmt.Sprintf(":%s", httpPort))
 }

@@ -1,4 +1,4 @@
-package config
+package amagin
 
 import (
 	"fmt"
@@ -9,14 +9,14 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/gobackerz/amagin"
-	"github.com/gobackerz/amagin/config/errors"
+	"github.com/gobackerz/amagin/errors"
 )
 
 type config struct {
 	logger amagin.Logger
 }
 
-func New(logger amagin.Logger, configDir ...string) *config {
+func newConfig(logger amagin.Logger, configDir ...string) *config {
 	c := &config{logger: logger}
 	depEnv := fmt.Sprintf(".%v.env", c.Get("DEP_ENV", "local"))
 	dir := "./configs/"
