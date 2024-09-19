@@ -2,21 +2,21 @@ package config
 
 import (
 	"fmt"
-	"github.com/gobackerz/amagin/config/errors"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/joho/godotenv"
 
-	pkgLog "github.com/gobackerz/amagin/log"
+	"github.com/gobackerz/amagin"
+	"github.com/gobackerz/amagin/config/errors"
 )
 
 type config struct {
-	logger pkgLog.Logger
+	logger amagin.Logger
 }
 
-func New(logger pkgLog.Logger, configDir ...string) Config {
+func New(logger amagin.Logger, configDir ...string) *config {
 	c := &config{logger: logger}
 	depEnv := fmt.Sprintf(".%v.env", c.Get("DEP_ENV", "local"))
 	dir := "./configs/"
@@ -29,16 +29,19 @@ func New(logger pkgLog.Logger, configDir ...string) Config {
 
 	if depEnv != ".local.env" {
 		if err := godotenv.Load(configFile); err != nil {
-			c.logger.Fatalf("Failed to read %v configs: %v", depEnv, err)
+			c.logger.Error("Failed to read %v configs: %v", depEnv, err)
+			os.Exit(0)
 		}
 	}
 
 	if err := c.readOptionalConfig(filepath.Join(dir, depEnv)); err != nil {
-		c.logger.Fatalf("Failed to read .local.env configs: %v", err)
+		c.logger.Error("Failed to read .local.env configs: %v", err)
+		os.Exit(0)
 	}
 
 	if err := c.readOptionalConfig(filepath.Join(dir, ".env")); err != nil {
-		c.logger.Fatalf("Failed to read .env configs: %v", err)
+		c.logger.Error("Failed to read .env configs: %v", err)
+		os.Exit(0)
 	}
 
 	return c

@@ -5,4 +5,6 @@ const (
 	POSTGRES = "postgres"
 	Type     = "type"
 	Value    = "value"
+
+	EnvLogLevel = "LOG_LEVEL"
 )

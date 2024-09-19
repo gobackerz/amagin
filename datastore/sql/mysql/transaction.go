@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/gobackerz/amagin/log"
+	"github.com/gobackerz/amagin"
 )
 
 type transaction struct {
 	tx     *sql.Tx
-	logger log.Logger
+	logger amagin.Logger
 }
 
 func (t *transaction) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {

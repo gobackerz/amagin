@@ -6,28 +6,28 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gobackerz/amagin"
 	"github.com/gobackerz/amagin/constants"
 	pkgSQL "github.com/gobackerz/amagin/datastore/sql"
-	"github.com/gobackerz/amagin/log"
 )
 
 type mysql struct {
 	db     *sql.DB
-	logger log.Logger
+	logger amagin.Logger
 }
 
-func New(host, port, user, password, name string, logger log.Logger) (*mysql, error) {
+func New(host, port, user, password, name string, logger amagin.Logger) (*mysql, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, name)
 
 	db, err := sql.Open(constants.MYSQL, dsn)
 	if err != nil {
-		logger.Printf("Failed to open MySQL database: %v", err)
+		logger.Error("Failed to open MySQL database: %v", err)
 
 		return nil, err
 	}
 
 	if err = db.Ping(); err != nil {
-		logger.Printf("Failed to open MySQL database: %v", err)
+		logger.Error("Failed to open MySQL database: %v", err)
 
 		return nil, err
 	}
@@ -69,5 +69,5 @@ func (m *mysql) Begin() (pkgSQL.Transaction, error) {
 }
 
 func (m *mysql) queryLogger(startTime time.Time, query string) {
-	m.logger.Printf("%s", query)
+	m.logger.Debug("%s", query)
 }

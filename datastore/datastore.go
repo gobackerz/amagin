@@ -6,18 +6,17 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 
-	"github.com/gobackerz/amagin/config"
+	"github.com/gobackerz/amagin"
 	"github.com/gobackerz/amagin/constants"
 	"github.com/gobackerz/amagin/datastore/sql"
 	"github.com/gobackerz/amagin/datastore/sql/mysql"
-	"github.com/gobackerz/amagin/log"
 )
 
 type datastore struct {
 	sql sql.SQL
 }
 
-func New(cfg config.Config, logger log.Logger) (Datastore, error) {
+func New(cfg amagin.Config, logger amagin.Logger) (*datastore, error) {
 	ds := &datastore{}
 	dbDialect := cfg.Get("DB_DIALECT")
 
@@ -40,7 +39,7 @@ func New(cfg config.Config, logger log.Logger) (Datastore, error) {
 	return ds, nil
 }
 
-func connectSQLDB(host, port, user, password, name, dialect string, logger log.Logger) (sql.SQL, error) {
+func connectSQLDB(host, port, user, password, name, dialect string, logger amagin.Logger) (sql.SQL, error) {
 	var (
 		sql sql.SQL
 		err error
