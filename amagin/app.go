@@ -24,7 +24,7 @@ type App struct {
 	amagin.Datastore
 
 	e      *gin.Engine
-	Logger amagin.Logger
+	logger amagin.Logger
 }
 
 type Handler func(ctx *Context) (interface{}, error)
@@ -48,7 +48,7 @@ func Default() *App {
 	e.Use(gin.Recovery())
 	e.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: performanceLogWriter.formatter, Output: performanceLogWriter}))
 
-	return &App{Config: cfg, Datastore: ds, e: e, Logger: logger}
+	return &App{Config: cfg, Datastore: ds, e: e, logger: logger}
 }
 
 func getLogLevelFromEnv() int {
@@ -67,8 +67,12 @@ func getLogLevelFromEnv() int {
 	return logLevel
 }
 
+func (a *App) Logger() amagin.Logger {
+	return a.logger
+}
+
 func (a *App) UseLogger(logger amagin.Logger) {
-	a.Logger = logger
+	a.logger = logger
 }
 
 func (a *App) UseConfig(cfg amagin.Config) {

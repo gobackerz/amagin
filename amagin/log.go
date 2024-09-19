@@ -40,7 +40,7 @@ func (l *performanceLogger) formatter(params gin.LogFormatterParams) string {
 	return defaultLogFormatter(params)
 }
 
-// defaultLogFormatter is the default log format function Logger middleware uses.
+// defaultLogFormatter is the default log format function logger middleware uses.
 var defaultLogFormatter = func(param gin.LogFormatterParams) string {
 	var statusColor, methodColor, resetColor string
 
