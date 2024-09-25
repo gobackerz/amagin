@@ -43,7 +43,7 @@ func (a *App) processHandler(c *gin.Context, handler Handler, defaultStatusCodes
 
 	res, err := handler(ctx)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Logger().Error(err.Error())
 	}
 
 	statusCode := a.getStatusCode(res, err, defaultStatusCodes...)

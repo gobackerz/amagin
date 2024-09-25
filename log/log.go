@@ -3,7 +3,6 @@ package log
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io"
 	"log"
 	"os"
@@ -94,14 +93,10 @@ func (l *logger) log(level int, msg string, args ...any) {
 	if ok {
 		performanceLog.Level = levelName[levelInfo]
 
-		if l.isTerminal {
-			l.logger.Print(fmt.Sprintf("%s%s\u001B[0m %s", levelColor[levelInfo], performanceLog.Level,
-				performanceLog.Message))
-
-			return
+		if !l.isTerminal {
+			performanceLog.Message = ""
 		}
 
-		performanceLog.Message = ""
 		log = *performanceLog
 	}
 
@@ -111,8 +106,8 @@ func (l *logger) log(level int, msg string, args ...any) {
 		return
 	}
 
-	l.logger.Print(fmt.Sprintf("%s%s\u001B[0m %s %s", levelColor[level], log.Level,
-		log.TimeStamp.Format("2006/01/02 - 15:04:05"), log.Message))
+	l.logger.Print(fmt.Sprintf("%s %s| %s | %s\u001B[0m ", log.TimeStamp.Format("2006/01/02 - 15:04:05"),
+		levelColor[level], log.Level, log.Message))
 }
 
 func (l *logger) getPerformanceLog(args ...any) (*Log, bool) {
@@ -123,12 +118,6 @@ func (l *logger) getPerformanceLog(args ...any) (*Log, bool) {
 	log, ok := args[0].(Log)
 
 	return &log, ok && log.IsPerformanceLog
-}
-
-func (l *logger) processPerformanceLog(log Log) {
-	if l.isTerminal {
-
-	}
 }
 
 func (l *logger) IsTerm() bool {
@@ -142,8 +131,4 @@ func isTerminal(w io.Writer) bool {
 	default:
 		return false
 	}
-}
-
-func preparePerformanceLog(params *gin.LogFormatterParams) {
-
 }
