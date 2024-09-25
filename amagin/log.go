@@ -2,6 +2,7 @@ package amagin
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -54,7 +55,7 @@ var defaultLogFormatter = func(param gin.LogFormatterParams) string {
 		param.Latency = param.Latency.Truncate(time.Second)
 	}
 
-	return fmt.Sprintf("%s %3d %s| %13v | %15s |%s %-7s %s %#v\n%s",
+	logMessage := fmt.Sprintf("%s %3d %s| %13v | %15s |%s %-7s %s %#v\n%s",
 		statusColor, param.StatusCode, resetColor,
 		param.Latency,
 		param.ClientIP,
@@ -62,4 +63,6 @@ var defaultLogFormatter = func(param gin.LogFormatterParams) string {
 		param.Path,
 		param.ErrorMessage,
 	)
+
+	return strings.TrimSpace(logMessage)
 }
