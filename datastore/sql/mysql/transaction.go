@@ -3,17 +3,31 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
-
-	"github.com/gobackerz/amagin"
 )
 
-type transaction struct {
-	tx     *sql.Tx
-	logger amagin.Logger
+type Tx struct {
+	tx      *sql.Tx
+	logger  Logger
+	metrics Metrics
 }
 
-func (t *transaction) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {
+func Begin(db any) (*Tx, error) {
+	sqlDb, ok := db.(*Mysql)
+	if !ok {
+		return nil, fmt.Errorf("unexpected instance")
+	}
+
+	tx, err := sqlDb.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Tx{tx: tx, logger: sqlDb.logger, metrics: sqlDb.metrics}, nil
+}
+
+func (t *Tx) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	startTime := time.Now()
 
 	defer t.queryLogger(startTime, query)
@@ -21,7 +35,7 @@ func (t *transaction) Exec(ctx context.Context, query string, args ...any) (sql.
 	return t.tx.ExecContext(ctx, query, args...)
 }
 
-func (t *transaction) Query(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+func (t *Tx) Query(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	startTime := time.Now()
 
 	defer t.queryLogger(startTime, query)
@@ -29,7 +43,7 @@ func (t *transaction) Query(ctx context.Context, query string, args ...any) (*sq
 	return t.tx.QueryContext(ctx, query, args...)
 }
 
-func (t *transaction) QueryRow(ctx context.Context, query string, args ...any) *sql.Row {
+func (t *Tx) QueryRow(ctx context.Context, query string, args ...any) *sql.Row {
 	startTime := time.Now()
 
 	defer t.queryLogger(startTime, query)
@@ -37,7 +51,7 @@ func (t *transaction) QueryRow(ctx context.Context, query string, args ...any) *
 	return t.tx.QueryRowContext(ctx, query, args...)
 }
 
-func (t *transaction) Commit() error {
+func (t *Tx) Commit() error {
 	startTime := time.Now()
 
 	defer t.queryLogger(startTime, "")
@@ -45,7 +59,7 @@ func (t *transaction) Commit() error {
 	return t.tx.Commit()
 }
 
-func (t *transaction) Rollback() error {
+func (t *Tx) Rollback() error {
 	startTime := time.Now()
 
 	defer t.queryLogger(startTime, "")
@@ -53,6 +67,6 @@ func (t *transaction) Rollback() error {
 	return t.tx.Rollback()
 }
 
-func (t *transaction) queryLogger(startTime time.Time, query string) {
+func (t *Tx) queryLogger(startTime time.Time, query string) {
 	return
 }

@@ -12,12 +12,12 @@ import (
 	"github.com/gobackerz/amagin/errors"
 )
 
-type config struct {
+type Config struct {
 	logger amagin.Logger
 }
 
-func newConfig(logger amagin.Logger, configDir ...string) *config {
-	c := &config{logger: logger}
+func newConfig(logger amagin.Logger, configDir ...string) *Config {
+	c := &Config{logger: logger}
 	depEnv := fmt.Sprintf(".%v.env", c.Get("DEP_ENV", "local"))
 	dir := "./configs/"
 
@@ -47,7 +47,7 @@ func newConfig(logger amagin.Logger, configDir ...string) *config {
 	return c
 }
 
-func (c *config) Get(key string, defaultVal ...string) string {
+func (c *Config) Get(key string, defaultVal ...string) string {
 	val := os.Getenv(key)
 
 	if strings.TrimSpace(val) == "" {
@@ -57,7 +57,7 @@ func (c *config) Get(key string, defaultVal ...string) string {
 	return val
 }
 
-func (c *config) Set(key string, value string) error {
+func (c *Config) Set(key string, value string) error {
 	if err := os.Setenv(key, value); err != nil {
 		return errors.Config{Operation: errors.CONFIG_SET, Key: key, Err: err}
 	}
@@ -65,7 +65,7 @@ func (c *config) Set(key string, value string) error {
 	return nil
 }
 
-func (c *config) Unset(key string) error {
+func (c *Config) Unset(key string) error {
 	if err := os.Unsetenv(key); err != nil {
 		return errors.Config{Operation: errors.CONFIG_UNSET, Key: key, Err: err}
 	}
@@ -73,7 +73,7 @@ func (c *config) Unset(key string) error {
 	return nil
 }
 
-func (c *config) getDefaultValue(value ...string) string {
+func (c *Config) getDefaultValue(value ...string) string {
 	var defaultVal string
 
 	if len(value) > 0 {
@@ -83,7 +83,7 @@ func (c *config) getDefaultValue(value ...string) string {
 	return defaultVal
 }
 
-func (c *config) readOptionalConfig(configFile string) error {
+func (c *Config) readOptionalConfig(configFile string) error {
 	_, err := os.Stat(configFile)
 	if os.IsNotExist(err) {
 		return nil

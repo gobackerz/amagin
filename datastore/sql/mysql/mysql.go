@@ -6,19 +6,27 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gobackerz/amagin"
-	"github.com/gobackerz/amagin/constants"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-type mysql struct {
-	db     *sql.DB
-	logger amagin.Logger
+type Config struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Name     string
 }
 
-func New(host, port, user, password, name string, logger amagin.Logger) (*mysql, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, name)
+type Mysql struct {
+	db      *sql.DB
+	logger  Logger
+	metrics Metrics
+}
 
-	db, err := sql.Open(constants.MYSQL, dsn)
+func New(config *Config, logger Logger, metrics Metrics) (*Mysql, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", config.User, config.Password, config.Host, config.Port, config.Name)
+
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		logger.Error("Failed to open MySQL database: %v", err)
 
@@ -31,10 +39,10 @@ func New(host, port, user, password, name string, logger amagin.Logger) (*mysql,
 		return nil, err
 	}
 
-	return &mysql{db: db, logger: logger}, nil
+	return &Mysql{db: db, logger: logger}, nil
 }
 
-func (m *mysql) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {
+func (m *Mysql) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	startTime := time.Now()
 
 	defer m.queryLogger(startTime, query)
@@ -42,7 +50,7 @@ func (m *mysql) Exec(ctx context.Context, query string, args ...any) (sql.Result
 	return m.db.ExecContext(ctx, query, args...)
 }
 
-func (m *mysql) Query(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+func (m *Mysql) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	startTime := time.Now()
 
 	defer m.queryLogger(startTime, query)
@@ -50,7 +58,7 @@ func (m *mysql) Query(ctx context.Context, query string, args ...any) (*sql.Rows
 	return m.db.QueryContext(ctx, query, args...)
 }
 
-func (m *mysql) QueryRow(ctx context.Context, query string, args ...any) *sql.Row {
+func (m *Mysql) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
 	startTime := time.Now()
 
 	defer m.queryLogger(startTime, query)
@@ -58,15 +66,15 @@ func (m *mysql) QueryRow(ctx context.Context, query string, args ...any) *sql.Ro
 	return m.db.QueryRowContext(ctx, query, args...)
 }
 
-func (m *mysql) Begin() (pkgSQL.Transaction, error) {
+func (m *Mysql) Begin() (*Tx, error) {
 	tx, err := m.db.Begin()
 	if err != nil {
 		return nil, err
 	}
 
-	return &transaction{tx: tx, logger: m.logger}, nil
+	return &Tx{tx: tx, logger: m.logger}, nil
 }
 
-func (m *mysql) queryLogger(startTime time.Time, query string) {
-	m.logger.Debug("%s", query)
+func (m *Mysql) queryLogger(startTime time.Time, query string) {
+	m.logger.Debug("query: %s", query)
 }

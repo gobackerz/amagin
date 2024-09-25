@@ -11,7 +11,7 @@ type datastore struct {
 	sql amagin.SQL
 }
 
-func newDatastore(cfg *config, logger amagin.Logger) (*datastore, error) {
+func newDatastore(cfg *Config, logger amagin.Logger) (*datastore, error) {
 	ds := &datastore{}
 	sqliteDB := cfg.Get("SQLITE_DB")
 

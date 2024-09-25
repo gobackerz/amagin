@@ -23,7 +23,7 @@ type App struct {
 
 	e      *gin.Engine
 	logger amagin.Logger
-	Config *config
+	config *Config
 }
 
 type Handler func(ctx *Context) (interface{}, error)
@@ -35,11 +35,12 @@ func New() *App {
 }
 
 func Default() *App {
-	logger := pkgLogger.New(getLogLevelFromEnv())
+	logger := pkgLogger.New()
 	cfg := newConfig(logger)
 	performanceLogWriter := &performanceLogger{logger: logger, isTerm: logger.IsTerm()}
 	ds := &datastore{}
 
+	logger.SetLevel(getLogLevelFromEnv())
 	gin.ForceConsoleColor()
 
 	e := gin.New()
@@ -47,7 +48,7 @@ func Default() *App {
 	e.Use(gin.Recovery())
 	e.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: performanceLogWriter.formatter, Output: performanceLogWriter}))
 
-	return &App{Config: cfg, datastore: ds, e: e, logger: logger}
+	return &App{config: cfg, datastore: ds, e: e, logger: logger}
 }
 
 func getLogLevelFromEnv() int {
@@ -66,6 +67,10 @@ func getLogLevelFromEnv() int {
 	return logLevel
 }
 
+func (a *App) Config() *Config {
+	return a.config
+}
+
 func (a *App) Logger() amagin.Logger {
 	return a.logger
 }
@@ -78,8 +83,8 @@ func (a *App) UseSQL(sql amagin.SQL) {
 	a.datastore.sql = sql
 }
 
-func (a *App) Run() {
-	httpPort := a.Config.Get("HTTP_PORT", "8000")
+func (a *App) Run() error {
+	httpPort := a.config.Get("HTTP_PORT", "8000")
 
-	a.e.Run(fmt.Sprintf(":%s", httpPort))
+	return a.e.Run(fmt.Sprintf(":%s", httpPort))
 }

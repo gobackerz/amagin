@@ -39,11 +39,10 @@ type logger struct {
 	isTerminal bool
 }
 
-func New(level int) *logger {
+func New() *logger {
 	l := logger{}
 
 	l.logger = log.New(os.Stdout, "", 0)
-	l.level = level
 	l.isTerminal = isTerminal(l.logger.Writer())
 
 	return &l
@@ -108,6 +107,10 @@ func (l *logger) log(level int, msg string, args ...any) {
 
 	l.logger.Print(fmt.Sprintf("%s %s| %s | %s\u001B[0m ", log.TimeStamp.Format("2006/01/02 - 15:04:05"),
 		levelColor[level], log.Level, log.Message))
+}
+
+func (l *logger) SetLevel(level int) {
+	l.level = level
 }
 
 func (l *logger) getPerformanceLog(args ...any) (*Log, bool) {
